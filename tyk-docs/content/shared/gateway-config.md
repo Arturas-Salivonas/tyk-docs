@@ -673,11 +673,17 @@ This is to ensure visibility for the management node across all APIs.
 ### auth_override
 This is used as part of the RPC / Hybrid back-end configuration in a Tyk Enterprise installation and isn’t used anywhere else.
 
+### enable_fixed_window_rate_limiter
+ENV: <b>TYK_GW_ENABLEFIXEDWINDOWRATELIMITER</b><br />
+Type: `bool`<br />
+
+EnableFixedWindow enables fixed window rate limiting.
+
 ### enable_redis_rolling_limiter
 ENV: <b>TYK_GW_ENABLEREDISROLLINGLIMITER</b><br />
 Type: `bool`<br />
 
-Redis based rate limiter with fixed window. Provides 100% rate limiting accuracy, but require two additional Redis roundtrip for each request.
+Redis based rate limiter with sliding log. Provides 100% rate limiting accuracy, but require two additional Redis roundtrip for each request.
 
 ### enable_sentinel_rate_limiter
 ENV: <b>TYK_GW_ENABLESENTINELRATELIMITER</b><br />
@@ -687,6 +693,13 @@ To enable, set to `true`. The sentinel-based rate limiter delivers a smoother pe
 Disabling the sentinel based rate limiter will make rate-limit calculations happen on-thread and therefore offers a staggered cool-down and a smoother rate-limit experience for the client.
 For example, you can slow your connection throughput to regain entry into your rate limit. This is more of a “throttle” than a “block”.
 The standard rate limiter offers similar performance as the sentinel-based limiter. This is disabled by default.
+
+### enable_rate_limit_smoothing
+ENV: <b>TYK_GW_ENABLERATELIMITSMOOTHING</b><br />
+Type: `bool`<br />
+
+EnableRateLimitSmoothing enables or disables rate smoothing. The rate smoothing is only supported on the
+Redis Rate Limiter, or the Sentinel Rate Limiter, as both algorithms implement a sliding log.
 
 ### enable_non_transactional_rate_limiter
 ENV: <b>TYK_GW_ENABLENONTRANSACTIONALRATELIMITER</b><br />
@@ -1268,7 +1281,9 @@ Defaults to "1.2".
 ENV: <b>TYK_GW_LIVENESSCHECK_CHECKDURATION</b><br />
 Type: `time.Duration`<br />
 
-Frequencies of performing interval healthchecks for Redis, Dashboard, and RPC layer. Default: 10 seconds.
+Frequencies of performing interval healthchecks for Redis, Dashboard, and RPC layer.
+Expressed in Nanoseconds. For example: 1000000000 -> 1s.
+Default: 10 seconds.
 
 ### dns_cache
 This section enables the global configuration of the expireable DNS records caching for your Gateway API endpoints.
